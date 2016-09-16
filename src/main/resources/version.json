@@ -1,0 +1,6 @@
+{
+  "name": "${project.artifactId}",
+  "version": "${project.version}",
+  "buildTime": "${buildTime}",
+  "revision": "${buildNumber}"
+}
