@@ -38,7 +38,9 @@ public class BrowseUI extends UI {
 
     private static final Logger LOG = LoggerFactory.getLogger(BrowseUI.class);
 
-    private final Grid grid;
+    private final HorizontalLayout main;
+    private final VerticalLayout left;
+    private final Grid list;
     private final Panel details;
 
     private TextField accessKey = new TextField("accessKey");
@@ -51,16 +53,15 @@ public class BrowseUI extends UI {
     private String prefix;
 
     public BrowseUI() {
-        grid = new Grid();
+        main = new HorizontalLayout();
+        left = new VerticalLayout();
+        list = new Grid();
         details = new Panel();
     }
 
     @Override
     protected void init(VaadinRequest request) {
-        final HorizontalLayout main = new HorizontalLayout();
-
-        final VerticalLayout menu = new VerticalLayout();
-        menu.setSpacing(true);
+        left.setSpacing(true);
 
         connectButton.addClickListener(e -> {
             connectToS3(accessKey.getValue(), secretKey.getValue(), endpoint.getValue());
@@ -78,31 +79,31 @@ public class BrowseUI extends UI {
         endpoint.setStyleName(ValoTheme.TEXTFIELD_TINY);
         bucket.setStyleName(ValoTheme.TEXTFIELD_TINY);
 
-        menu.addComponent(accessKey);
-        menu.addComponent(secretKey);
-        menu.addComponent(endpoint);
-        menu.addComponent(bucket);
-        menu.addComponent(connectButton);
-        menu.setWidth(330, Unit.PIXELS);
+        left.addComponent(accessKey);
+        left.addComponent(secretKey);
+        left.addComponent(endpoint);
+        left.addComponent(bucket);
+        left.addComponent(connectButton);
+        left.setWidth(330, Unit.PIXELS);
 
         details.setWidth(400, Unit.PIXELS);
         details.setContent(new Label("DETAILS"));
         details.setVisible(false);
 
-        main.addComponent(menu);
-        main.addComponent(grid);
+        main.addComponent(left);
+        main.addComponent(list);
         main.addComponent(details);
-        main.setExpandRatio(grid, 1.0f);
+        main.setExpandRatio(list, 1.0f);
         main.setMargin(true);
         main.setSpacing(true);
         main.setSizeFull();
 
         updateList();
 
-        grid.setColumns("key");
-        grid.setSizeFull();
+        list.setColumns("key");
+        list.setSizeFull();
 
-        grid.addSelectionListener(l -> {
+        list.addSelectionListener(l -> {
             Set selected = l.getSelected();
             if (selected.size() == 1) {
                 ListEntry item = (ListEntry) selected.toArray()[0];
@@ -155,7 +156,7 @@ public class BrowseUI extends UI {
         }
 
         BeanItemContainer<ListEntry> container = new BeanItemContainer<>(ListEntry.class, objects);
-        grid.setContainerDataSource(container);
+        list.setContainerDataSource(container);
     }
 
     private void updateDetails(ListEntry item) {
