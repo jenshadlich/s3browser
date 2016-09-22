@@ -10,7 +10,7 @@ import java.io.IOException;
  * @author jenshadlich@googlemail.com
  */
 @RestController
-public class Index {
+public class IndexResource {
 
     @RequestMapping("/")
     protected void redirectToBrowse(HttpServletResponse response) throws IOException {
