@@ -1,4 +1,4 @@
-package de.jeha.demo.springboot.resources;
+package de.jeha.s3browser.resources;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

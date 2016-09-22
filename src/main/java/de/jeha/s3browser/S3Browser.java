@@ -1,4 +1,4 @@
-package de.jeha.demo.springboot;
+package de.jeha.s3browser;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

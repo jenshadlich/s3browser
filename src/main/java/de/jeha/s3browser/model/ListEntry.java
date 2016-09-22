@@ -1,4 +1,4 @@
-package de.jeha.demo.springboot.model;
+package de.jeha.s3browser.model;
 
 /**
  * @author jenshadlich@googlemail.com
