@@ -13,8 +13,9 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.vaadin.annotations.Theme;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FileDownloader;
 import com.vaadin.server.Page;
+import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
@@ -45,7 +46,7 @@ public class BrowseUI extends UI {
     private TextField secretKey = new TextField("secretKey");
     private TextField endpoint = new TextField("endpoint");
     private TextField bucket = new TextField("bucket");
-    private Button applyButton = new Button("Apply");
+    private Button connectButton = new Button("Connect");
 
     private AmazonS3 s3Client;
     private String prefix;
@@ -62,7 +63,7 @@ public class BrowseUI extends UI {
         final VerticalLayout menu = new VerticalLayout();
         menu.setSpacing(true);
 
-        applyButton.addClickListener(e -> {
+        connectButton.addClickListener(e -> {
             connectToS3(accessKey.getValue(), secretKey.getValue(), endpoint.getValue());
             updateList();
             prefix = null;
@@ -82,7 +83,7 @@ public class BrowseUI extends UI {
         menu.addComponent(secretKey);
         menu.addComponent(endpoint);
         menu.addComponent(bucket);
-        menu.addComponent(applyButton);
+        menu.addComponent(connectButton);
         menu.setWidth(330, Unit.PIXELS);
 
         details.setWidth(400, Unit.PIXELS);
@@ -183,9 +184,15 @@ public class BrowseUI extends UI {
         detailsContent.addComponent(buildDetailsTextField("ContentType", objectMetadata.getContentType()));
         detailsContent.addComponent(buildDetailsTextField("ETag", objectMetadata.getETag()));
 
-        Link downloadLink = new Link("Download", new ExternalResource("/download/foo"));
-        downloadLink.setTargetName("_blank");
-        detailsContent.addComponent(downloadLink);
+        Button downloadButton = new Button("Download");
+
+        FileDownloader fileDownloader = new FileDownloader(new StreamResource(() -> {
+            LOG.info("Download {}/{}", item.getBucket(), item.getKey());
+            return s3Client.getObject(item.getBucket(), item.getKey()).getObjectContent();
+        }, item.getKey()));
+        fileDownloader.extend(downloadButton);
+
+        detailsContent.addComponent(downloadButton);
 
         details.setContent(detailsContent);
     }
