@@ -10,7 +10,6 @@ import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.vaadin.annotations.Theme;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.FileDownloader;
@@ -20,7 +19,6 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
-import de.jeha.s3browser.model.DetailsEntry;
 import de.jeha.s3browser.model.ListEntry;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author jenshadlich@googlemail.com
@@ -118,10 +117,10 @@ public class BrowseUI extends UI {
                     } else {
                         prefix = item.getKey();
                     }
-                    updateList();
+                    BrowseUI.this.updateList();
                     details.setVisible(false);
                 } else {
-                    updateDetails(item);
+                    BrowseUI.this.updateDetails(item);
                     details.setVisible(true);
                 }
             }
@@ -143,14 +142,16 @@ public class BrowseUI extends UI {
             }
 
             LOG.info("ObjectListing#commonPrefixes.size()={}", objectListing.getCommonPrefixes().size());
-            for (String commonPrefix : objectListing.getCommonPrefixes()) {
-                objects.add(new ListEntry(bucket, prefix, commonPrefix, false));
-            }
+            objects.addAll(objectListing.getCommonPrefixes()
+                    .stream()
+                    .map(commonPrefix -> new ListEntry(bucket, prefix, commonPrefix, false))
+                    .collect(Collectors.toList()));
 
             LOG.info("ObjectListing#objectSummaries.size()={}", objectListing.getObjectSummaries().size());
-            for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
-                objects.add(new ListEntry(bucket, prefix, objectSummary.getKey(), true));
-            }
+            objects.addAll(objectListing.getObjectSummaries()
+                    .stream()
+                    .map(objectSummary -> new ListEntry(bucket, prefix, objectSummary.getKey(), true))
+                    .collect(Collectors.toList()));
         }
 
         BeanItemContainer<ListEntry> container = new BeanItemContainer<>(ListEntry.class, objects);
@@ -169,16 +170,6 @@ public class BrowseUI extends UI {
         caption.addStyleName(ValoTheme.LABEL_H3);
         detailsContent.addComponent(caption);
 
-        Grid detailsGrid = new Grid();
-        List<DetailsEntry> detailsEntries = new ArrayList<>();
-
-        detailsEntries.add(new DetailsEntry("LastModified", objectMetadata.getLastModified().toString()));
-        detailsEntries.add(new DetailsEntry("ContentType", objectMetadata.getContentType()));
-        detailsEntries.add(new DetailsEntry("ContentLength", Long.toString(objectMetadata.getContentLength())));
-
-        detailsGrid.setContainerDataSource(new BeanItemContainer<>(DetailsEntry.class, detailsEntries));
-        //detailsContent.addComponent(detailsGrid);
-
         detailsContent.addComponent(buildDetailsTextField("LastModified", objectMetadata.getLastModified().toString()));
         detailsContent.addComponent(buildDetailsTextField("ContentLength", Long.toString(objectMetadata.getContentLength())));
         detailsContent.addComponent(buildDetailsTextField("ContentType", objectMetadata.getContentType()));
@@ -191,7 +182,6 @@ public class BrowseUI extends UI {
             return s3Client.getObject(item.getBucket(), item.getKey()).getObjectContent();
         }, item.getKey()));
         fileDownloader.extend(downloadButton);
-
         detailsContent.addComponent(downloadButton);
 
         details.setContent(detailsContent);
