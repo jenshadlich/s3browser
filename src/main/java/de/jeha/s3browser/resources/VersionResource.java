@@ -1,4 +1,4 @@
-package de.jeha.demo.springboot.resources;
+package de.jeha.s3browser.resources;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;

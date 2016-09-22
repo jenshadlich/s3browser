@@ -1,4 +1,4 @@
-package de.jeha.demo.springboot.config;
+package de.jeha.s3browser.config;
 
 import org.springframework.context.annotation.Configuration;
 
