@@ -171,10 +171,16 @@ public class BrowseUI extends UI {
         caption.addStyleName(ValoTheme.LABEL_H3);
         detailsContent.addComponent(caption);
 
-        detailsContent.addComponent(buildDetailsTextField("LastModified", objectMetadata.getLastModified().toString()));
+        if (objectMetadata.getLastModified() != null) {
+            detailsContent.addComponent(buildDetailsTextField("LastModified", objectMetadata.getLastModified().toString()));
+        }
         detailsContent.addComponent(buildDetailsTextField("ContentLength", Long.toString(objectMetadata.getContentLength())));
-        detailsContent.addComponent(buildDetailsTextField("ContentType", objectMetadata.getContentType()));
-        detailsContent.addComponent(buildDetailsTextField("ETag", objectMetadata.getETag()));
+        if (objectMetadata.getContentType() != null) {
+            detailsContent.addComponent(buildDetailsTextField("ContentType", objectMetadata.getContentType()));
+        }
+        if (objectMetadata.getETag() != null) {
+            detailsContent.addComponent(buildDetailsTextField("ETag", objectMetadata.getETag()));
+        }
 
         Button downloadButton = new Button("Download");
 
