@@ -44,10 +44,12 @@ public class BrowseUI extends UI {
     private final Panel details;
 
     private TextField accessKey = new TextField("accessKey");
-    private TextField secretKey = new TextField("secretKey");
+    private PasswordField secretKey = new PasswordField("secretKey");
     private TextField endpoint = new TextField("endpoint");
     private TextField bucket = new TextField("bucket");
-    private Button connectButton = new Button("Connect");
+    private CheckBox secure = new CheckBox("https");
+    private CheckBox pathStyle = new CheckBox("pathStyle");
+    private Button connect = new Button("Connect");
 
     private AmazonS3 s3Client;
     private String prefix;
@@ -63,11 +65,26 @@ public class BrowseUI extends UI {
     protected void init(VaadinRequest request) {
         left.setSpacing(true);
 
-        connectButton.addClickListener(e -> {
+        connect.addClickListener(e -> {
             connectToS3(accessKey.getValue(), secretKey.getValue(), endpoint.getValue());
             updateList();
             prefix = null;
         });
+
+        if (request.getParameter("accessKey") != null) {
+            accessKey.setValue(request.getParameter("accessKey"));
+        }
+        if (request.getParameter("secretKey") != null) {
+            secretKey.setValue(request.getParameter("secretKey"));
+        }
+        if (request.getParameter("endpoint") != null) {
+            endpoint.setValue(request.getParameter("endpoint"));
+        }
+        if (request.getParameter("bucket") != null) {
+            bucket.setValue(request.getParameter("bucket"));
+        }
+
+        pathStyle.setValue(Boolean.TRUE);
 
         accessKey.setWidth(300, Unit.PIXELS);
         secretKey.setWidth(300, Unit.PIXELS);
@@ -78,12 +95,16 @@ public class BrowseUI extends UI {
         secretKey.setStyleName(ValoTheme.TEXTFIELD_TINY);
         endpoint.setStyleName(ValoTheme.TEXTFIELD_TINY);
         bucket.setStyleName(ValoTheme.TEXTFIELD_TINY);
+        secure.setStyleName(ValoTheme.TEXTFIELD_TINY);
+        pathStyle.setStyleName(ValoTheme.TEXTFIELD_TINY);
 
         left.addComponent(accessKey);
         left.addComponent(secretKey);
         left.addComponent(endpoint);
         left.addComponent(bucket);
-        left.addComponent(connectButton);
+        left.addComponent(secure);
+        left.addComponent(pathStyle);
+        left.addComponent(connect);
         left.setWidth(330, Unit.PIXELS);
 
         details.setWidth(400, Unit.PIXELS);
