@@ -66,7 +66,7 @@ public class BrowseUI extends UI {
         left.setSpacing(true);
 
         connect.addClickListener(e -> {
-            connectToS3(accessKey.getValue(), secretKey.getValue(), endpoint.getValue());
+            connectToS3(accessKey.getValue(), secretKey.getValue(), endpoint.getValue(), secure.getValue(), pathStyle.getValue());
             updateList();
             prefix = null;
         });
@@ -223,17 +223,20 @@ public class BrowseUI extends UI {
         return textField;
     }
 
-    private void connectToS3(String accessKey, String secretKey, String endpoint) {
+    private void connectToS3(String accessKey, String secretKey, String endpoint, boolean secure, boolean pathStyle) {
         LOG.info("'{}','{}','{}'", accessKey, secretKey, endpoint);
         AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
 
         ClientConfiguration clientConfiguration = new ClientConfiguration()
-                .withProtocol(Protocol.HTTP)
+                .withProtocol(secure ? Protocol.HTTPS : Protocol.HTTP)
                 .withUserAgentPrefix("s3browser")
                 .withSignerOverride("S3SignerType");
 
         s3Client = new AmazonS3Client(credentials, clientConfiguration);
-        s3Client.setS3ClientOptions(S3ClientOptions.builder().setPathStyleAccess(true).disableChunkedEncoding().build());
+        s3Client.setS3ClientOptions(S3ClientOptions.builder()
+                .setPathStyleAccess(pathStyle)
+                .disableChunkedEncoding()
+                .build());
         s3Client.setEndpoint(endpoint);
     }
 
