@@ -44,15 +44,15 @@ public class BrowseUI extends UI {
     private final Grid list;
     private final Panel details;
 
-    private TextField accessKey = new TextField("accessKey");
-    private PasswordField secretKey = new PasswordField("secretKey");
-    private TextField endpoint = new TextField("endpoint");
-    private TextField bucket = new TextField("bucket");
-    private CheckBox secure = new CheckBox("https");
-    private CheckBox pathStyle = new CheckBox("pathStyle");
+    private TextField accessKey = new TextField("Access Key");
+    private PasswordField secretKey = new PasswordField("Secret Key");
+    private TextField endpoint = new TextField("Endpoint");
+    private TextField bucket = new TextField("Bucket");
+    private CheckBox secure = new CheckBox("Use https");
+    private CheckBox pathStyle = new CheckBox("Path-style access");
     private Button connect = new Button("Connect");
 
-    private TextField filter = new TextField("prefixFilter");
+    private TextField filter = new TextField("Filter key by prefix");
     private AmazonS3 s3Client;
     private String prefix;
     private boolean insertDots = true;
@@ -71,8 +71,9 @@ public class BrowseUI extends UI {
         connect.addClickListener(e -> {
             connectToS3(accessKey.getValue(), secretKey.getValue(), endpoint.getValue(), secure.getValue(), pathStyle.getValue());
             filter.setValue("");
-            updateList();
             prefix = null;
+            details.setVisible(false);
+            updateList();
         });
 
         if (request.getParameter("accessKey") != null) {
