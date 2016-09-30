@@ -16,6 +16,7 @@ import com.vaadin.server.FileDownloader;
 import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
@@ -51,8 +52,10 @@ public class BrowseUI extends UI {
     private CheckBox pathStyle = new CheckBox("pathStyle");
     private Button connect = new Button("Connect");
 
+    private TextField filter = new TextField("prefixFilter");
     private AmazonS3 s3Client;
     private String prefix;
+    private boolean insertDots = true;
 
     public BrowseUI() {
         main = new HorizontalLayout();
@@ -67,6 +70,7 @@ public class BrowseUI extends UI {
 
         connect.addClickListener(e -> {
             connectToS3(accessKey.getValue(), secretKey.getValue(), endpoint.getValue(), secure.getValue(), pathStyle.getValue());
+            filter.setValue("");
             updateList();
             prefix = null;
         });
@@ -106,6 +110,8 @@ public class BrowseUI extends UI {
         left.addComponent(pathStyle);
         left.addComponent(connect);
         left.setWidth(330, Unit.PIXELS);
+        left.addComponent(new Label("<hr />", ContentMode.HTML));
+        left.addComponent(filter);
 
         details.setWidth(400, Unit.PIXELS);
         details.setContent(new Label("DETAILS"));
@@ -125,6 +131,7 @@ public class BrowseUI extends UI {
         list.setSizeFull();
 
         list.addSelectionListener(l -> {
+            insertDots = true;
             Set selected = l.getSelected();
             if (selected.size() == 1) {
                 ListEntry item = (ListEntry) selected.toArray()[0];
@@ -139,13 +146,19 @@ public class BrowseUI extends UI {
                     } else {
                         prefix = item.getKey();
                     }
-                    BrowseUI.this.updateList();
+                    this.updateList();
                     details.setVisible(false);
                 } else {
-                    BrowseUI.this.updateDetails(item);
+                    this.updateDetails(item);
                     details.setVisible(true);
                 }
             }
+        });
+
+        filter.addTextChangeListener(l -> {
+            insertDots = false;
+            prefix = l.getText();
+            this.updateList();
         });
 
         Page.getCurrent().setTitle("Browse");
@@ -159,7 +172,7 @@ public class BrowseUI extends UI {
         List<ListEntry> objects = new ArrayList<>();
         if (s3Client != null) {
             ObjectListing objectListing = s3Client.listObjects(new ListObjectsRequest(bucket, prefix, null, "/", null));
-            if (prefix != null) {
+            if (prefix != null && insertDots) {
                 objects.add(new ListEntry(bucket, prefix, "..", false));
             }
 
