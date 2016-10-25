@@ -172,7 +172,7 @@ public class BrowseUI extends UI {
 
         List<ListEntry> objects = new ArrayList<>();
         if (s3Client != null) {
-            ObjectListing objectListing = s3Client.listObjects(new ListObjectsRequest(bucket, prefix, null, "/", null));
+            ObjectListing objectListing = s3Client.listObjects(new ListObjectsRequest(bucket, prefix, null, "/", 1_000));
             if (prefix != null && insertDots) {
                 objects.add(new ListEntry(bucket, prefix, "..", false));
             }
